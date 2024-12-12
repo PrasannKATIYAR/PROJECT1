@@ -1,0 +1,1633 @@
+clear;    (Removes all variables, functions, and MEX-files from the workspace, ensuring a clean state.)
+clc;              ( Clears the Command Window, removing any displayed text without affecting the workspace.)
+close all;          (Any figures or plots from previous executions are closed, avoiding confusion or clutter.)
+
+---------------------------------------------------------------------------------------------------------------------------------------
+
+Colour1 = [0.2 0.8 1];
+Colour2 = [0 .8 0];
+Colour3 = [1 .5 1];
+Colour4 = [1 .6 .4];
+Colour5 = [1 0.35 0.35];
+Colour6 = [153/255 51/255 1];
+Colour7 = [25/255, 75/255, 1];
+Colour8 = [51/255 1 51/255];
+Colour9 = [1 .15 1];
+Colour10 = [1 51/255 51/255];
+
+(This MATLAB code defines 10 different RGB color vectors (Colour1 to Colour10), each specifying a unique color by assigning normalized values between 0 and 1 for the red, green, and blue (RGB) components.)
+
+----------------------------------------------------------------------------------------------------------------------------------------
+
+
+UserPrompt = 'Which scenario do you want to simulate? Options are 1-10.';
+UserAnswer = input(UserPrompt)
+
+if UserAnswer == 1
+
+Scenario = 'Scenario 1 - %d.%d.%d %s';
+ID1 = 4;
+ID2 = 1;
+ID3 = 1;
+Season = 'Winter (No PV or Storage)';
+NumberofPVSystems = 0;
+NumberofBatterySystems = 0;
+
+elseif UserAnswer == 2
+    
+Scenario = 'Scenario 2 - %d.%d.%d %s';
+ID1 = 4;
+ID2 = 1;
+ID3 = 2;
+Season = 'Summer (No PV or Storage)';
+NumberofPVSystems =0;
+NumberofBatterySystems =0;
+
+elseif UserAnswer == 3
+        
+Scenario = 'Scenario 3 - %d.%d.%d %s';
+ID1 = 4;
+ID2 = 2;
+ID3 = 1;
+Season = 'Winter (50% PV, No Storage)';
+NumberofPVSystems = length(1:2:55);
+NumberofBatterySystems =0;
+
+elseif UserAnswer == 4
+        
+Scenario = 'Scenario 4 - %d.%d.%d %s';
+ID1 = 4;
+ID2 = 2;
+ID3 = 2;
+Season = 'Summer (50% PV, No Storage)';
+NumberofPVSystems = length(1:2:55);
+NumberofBatterySystems =0;
+
+elseif UserAnswer == 5
+        
+Scenario = 'Scenario 5 - %d.%d.%d %s';
+ID1 = 4;
+ID2 = 3;
+ID3 = 1;
+Season = 'Winter (100% PV, No Storage)';
+NumberofPVSystems = 55;
+NumberofBatterySystems = 0;
+
+elseif UserAnswer == 6
+        
+Scenario = 'Scenario 6 - %d.%d.%d %s';
+ID1 = 4;
+ID2 = 3;
+ID3 = 2;
+Season = 'Summer (100% PV, No Storage)';
+NumberofPVSystems = 55;
+NumberofBatterySystems = 0;
+
+elseif UserAnswer == 7
+        
+Scenario = 'Scenario 7 - %d.%d.%d %s';
+ID1 = 4;
+ID2 = 4;
+ID3 = 1;
+Season = 'Winter (50% PV, 50% Storage)';
+NumberofPVSystems = length(1:2:55);
+NumberofBatterySystems =length(1:2:55);
+
+elseif UserAnswer == 8
+        
+Scenario = 'Scenario 8 - %d.%d.%d %s';
+ID1 = 4;
+ID2 = 4;
+ID3 = 2;
+Season = 'Summer (50% PV, 50% Storage)';
+NumberofPVSystems = length(1:2:55);
+NumberofBatterySystems =length(1:2:55);
+
+elseif UserAnswer == 9
+        
+Scenario = 'Scenario 9 - %d.%d.%d %s';
+ID1 = 4;
+ID2 = 5;
+ID3 = 1;
+Season = 'Winter (100% PV, 100% Storage)';
+NumberofPVSystems = 55;
+NumberofBatterySystems = 55;
+
+elseif UserAnswer == 10
+        
+Scenario = 'Scenario 10 - %d.%d.%d %s';
+ID1 = 4;
+ID2 = 5;
+ID3 = 2;
+Season = 'Summer (100% PV, 100% Storage)';
+NumberofPVSystems = 55;
+NumberofBatterySystems = 55;
+
+else
+        
+ErrorMessage = 'Selection not valid. Please select a valid Scenario in integer format between 1-10.';
+
+end
+
+
+CODE EXPLANATION:
+1)User Prompt and Input:Purpose: Displays a prompt asking the user to choose a scenario (an integer between 1 and 10). The user's input is stored in the variable UserAnswer.
+
+2)Conditional Statements (if-elseif):
+Based on the user's input (UserAnswer), the code selects one of 10 predefined scenarios. For each scenario, it assigns values to several variables: Scenario, ID1, ID2, ID3, Season, NumberofPVSystems, and NumberofBatterySystems.
+
+3)Scenario Setup:
+For Scenarios 1-6, only the number of PV systems is specified, while the number of battery systems remains 0. These scenarios simulate setups without energy storage.
+For Scenarios 7-10, both PV systems and battery systems are specified, simulating configurations with energy storage. The use of length(1:2:55) defines a setup where 50% of the total systems (PV or battery) are considered, using only odd-indexed systems between 1 and 55.
+
+4)Simulation Identifiers:These variables (ID1, ID2, and ID3) likely serve as identifiers for the simulation, differentiating between the seasons and PV/storage configurations.
+
+5)Error Handling:
+If the user enters a value outside of the range 1-10, the code sets an error message.
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+[DSSStartOK, DSSObj, DSSText] = DSSStartup;
+
+DSSCircuit = DSSObj.ActiveCircuit;
+DSSSolution = DSSCircuit.Solution;
+
+
+CODE EXPLANATION:The code initializes the OpenDSS environment by starting the simulation engine and establishing a connection through the DSSStartup function. It then retrieves the currently active circuit model using DSSObj.ActiveCircuit and accesses the associated solution object with DSSCircuit.Solution, which allows for running simulations and analyzing results.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+DSSText.command = 'clearall'; 
+DSSText.command = 'clear'; 
+DSSText.command = 'Set DefaultBaseFrequency = 50'; 
+
+DSSText.command = 'New circuit.MastersThesis_StefanBajai_IEEE_TestFeeder'; 
+% DSSText.command = 'set algorithm=newton'; 
+DSSText.command = 'Edit Vsource.Source BasekV=11 pu=1 ISC3=3000  ISC1=1500';
+
+DSSText.command = 'Redirect LineCodes.txt';    
+
+
+CODE EXPALNATION:This code snippet uses the DSSText object to send a series of commands to the OpenDSS simulation engine. It first clears any previous configurations with clearall and clear, then sets the default base frequency to 50 Hz. Next, it defines a new circuit named MastersThesis_StefanBajai_IEEE_TestFeeder and edits a voltage source (Vsource) with specific parameters such as base voltage and short-circuit currents. Finally, it redirects the line code definitions from an external file called LineCodes.txt, which contains the specifications for line models used in the simulation.
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+if ID3 ==1 
+DSSText.command = 'Redirect Winter_Load_Shapes.txt';
+elseif ID3 ==2 % 
+DSSText.command = 'Redirect Summer_Load_Shapes.txt';
+else
+ErrorMessage = 'ID3 is not correct.Check Code.';
+end
+
+
+DSSText.command = 'Redirect Line_Definitions.txt.'; 
+
+
+DSSText.command = 'New Transformer.TR1 Buses=[SourceBus 1] Conns=[Delta Wye] kVs=[11 0.416] kVAs=[800 800] XHL=4 sub=y';
+
+
+if (ID2 == 2 && ID3 ==1) ||(ID2 == 4 && ID3 ==1)
+DSSText.command = 'Redirect Scenario_3_or_7_PV.txt';
+end
+
+
+if (ID2 == 2 && ID3 ==2)||(ID2 == 4 && ID3 ==2)
+DSSText.command = 'Redirect Scenario_4_or_8_PV.txt';
+end
+
+if (ID2 == 3 && ID3 ==1)||(ID2 == 5 && ID3 ==1)
+DSSText.command = 'Redirect Scenario_5_or_9_PV.txt';
+end
+
+
+if (ID2 == 3 && ID3 ==2)||(ID2 == 5 && ID3 ==2)
+DSSText.command = 'Redirect Scenario_6_or_10_PV.txt';
+end
+
+if (ID2 == 4 && ID3 ==1)
+DSSText.command = 'Redirect Scenario_7_Battery_Loadshapes.txt';
+end
+
+
+if (ID2 == 4 && ID3 ==2)
+DSSText.command = 'Redirect Scenario_8_Battery_Loadshapes.txt';
+end
+
+if (ID2 == 5 && ID3 ==1)
+DSSText.command = 'Redirect Scenario_9_Battery_Loadshapes.txt';
+end
+
+
+if (ID2 == 5 && ID3 ==2)
+DSSText.command = 'Redirect Scenario_10_Battery_Loadshapes.txt';
+end
+
+
+if (ID2 == 2 && ID3 ==1) ||(ID2 == 4 && ID3 ==1)
+DSSText.command = 'Redirect Scenario_3_or_7_PV_System_Definition_PV.txt';
+end 
+
+
+if (ID2 == 2 && ID3 ==2)||(ID2 == 4 && ID3 ==2)
+DSSText.command = 'Redirect Scenario_4_or_8_PV_System_Definition_PV.txt';
+end
+
+
+if (ID2 == 3 && ID3 ==1)||(ID2 == 5 && ID3 ==1)
+DSSText.command = 'Redirect Scenario_5_or_9_PV_System_Definition_PV.txt';
+end
+
+
+if (ID2 == 3 && ID3 ==2)||(ID2 == 5 && ID3 ==2)
+DSSText.command = 'Redirect Scenario_6_or_10_PV_System_Definition_PV.txt';
+end
+
+
+if (ID2 == 4 && ID3 ==1)||(ID2 == 4 && ID3 ==2)
+DSSText.command = 'Redirect Scenario_7_or_8_Battery_System_Definition.txt';
+end
+
+
+if (ID2 == 5 && ID3 ==1)||(ID2 == 5 && ID3 ==2)
+DSSText.command = 'Redirect Scenario_9_or_10_Battery_System_Definition.txt';
+end
+
+
+DSSText.command = 'Redirect LoadDefinitions.txt';  
+
+CODE EXPLANATION:
+1)Loading Seasonal Load Shapes:
+
+The first if-elseif block checks the value of ID3. If ID3 is 1, it redirects to the winter load shapes file (Winter_Load_Shapes.txt), and if it is 2, it redirects to the summer load shapes file (Summer_Load_Shapes.txt). If ID3 is neither, an error message is generated.
+
+2)Redirecting to Line Definitions:
+The command DSSText.command = 'Redirect Line_Definitions.txt.'; loads the definitions for the lines used in the circuit simulation.
+
+3)Defining a Transformer:
+The line with New Transformer.TR1 defines a new transformer in the circuit with specified parameters, including bus connections, voltage ratings, power ratings, and impedance.
+
+4)Loading Scenario-Specific Files:
+Multiple if statements follow that check combinations of ID2 and ID3 to redirect to specific scenario files. Each condition corresponds to a different simulation scenario for photovoltaic (PV) systems or battery load shapes, allowing for tailored configurations based on the selected simulation parameters.
+
+5)Final Load Definitions:
+The last command DSSText.command = 'Redirect LoadDefinitions.txt'; loads additional definitions for the loads in the circuit, ensuring that all necessary parameters are set for the simulation.
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+DSSText.command = 'Set voltagebases=[11  .416]';
+DSSText.command = 'Calcvoltagebases';
+DSSText.command = 'buscoords buscoords.txt' 
+
+CODE EXPLANATION:
+
+Set Voltage Bases: The first line sets the system voltage bases to 11 kV and 0.416 kV, defining the primary and secondary voltage levels for the simulation.
+
+Calculate Voltage Bases: The second line calculates the voltage bases based on the previously set values, ensuring all components reflect these voltage levels correctly.
+
+Export Bus Coordinates: The third line exports the coordinates of all buses in the system to a text file named buscoords.txt, which can be useful for analysis or visualization.
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------
+
+DSSText.command = 'batchedit storage..* Vmaxpu=1.15 Vminpu=0.85'; 
+DSSText.command = 'batchedit storage..* %reserve=0 %stored=50';
+DSSText.command= 'set mode=yearly number= 1440 stepsize=1m';
+
+CODE EXPLANATION:
+
+Set Voltage Limits: The first line applies a batch edit to all storage devices, setting their maximum and minimum voltage limits to 1.15 and 0.85 per unit (pu), respectively, ensuring they operate within safe voltage ranges.
+
+Configure Storage Reserve and Initial Storage: The second line sets the reserve percentage to 0% and the initial stored energy to 50%, defining how much energy is available for use and how much should be reserved.
+
+Set Simulation Mode: The third line configures the simulation to run in yearly mode with 1440 time steps of 1 minute each, allowing for detailed analysis of storage behavior over the course of a year.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+NodeNames = DSSCircuit.AllNodeNames        
+BusNames = DSSCircuit.AllBusNames;          
+ElementNames = DSSCircuit.AllElementNames;  
+NumberofCircuitElements = DSSCircuit.NumCktElements;
+
+CODE EXPLANATION:
+
+Get Node Names: NodeNames = DSSCircuit.AllNodeNames retrieves the names of all nodes in the circuit, which represent connection points within the network.
+
+Get Bus Names: BusNames = DSSCircuit.AllBusNames collects the names of all buses, which are nodes that can distribute power to multiple branches in the system.
+
+Get Element Names: ElementNames = DSSCircuit.AllElementNames obtains the names of all elements in the circuit (like lines, transformers, and loads) for analysis or manipulation.
+
+Count Circuit Elements: NumberofCircuitElements = DSSCircuit.NumCktElements returns the total number of circuit elements, providing a quick overview of the circuit's complexity
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+V1 = zeros(1440,907); % (1440 minutes and 907 buses)
+V2 = zeros(1440,907);
+V3 = zeros(1440,907);
+ComplexVolts = zeros(1440,5442);
+CircuitLosses = zeros(1440,2);
+TransformerLosses = zeros(1440,2);
+GridPower = zeros(1440,2);
+PVInjectedPowers = zeros(1440,NumberofPVSystems);
+ActiveBatteryPowers = zeros(1440,NumberofBatterySystems);
+ReactiveBatteryPowers = zeros(1440,NumberofBatterySystems);
+ActiveLoadPowers = zeros(1440,55);
+ReactiveLoadPowers = zeros(1440,55);
+LineLosses = zeros(1440,2);
+TransformerPower = zeros(1440,16);
+ElementLosses = zeros(1440,2*NumberofCircuitElements);
+
+
+CODE EXPLANATON:
+The provided MATLAB code initializes several matrices that are essential for storing simulation results related to a power distribution system over a time frame of 1440 minutes (1 day):
+
+Voltage Matrices: V1, V2, and V3 are created as 
+1440×907 zero matrices to hold voltage values for 907 buses throughout the day.
+
+Complex Voltage Data: ComplexVolts is initialized to a size of
+1440×5442, intended to store complex voltage values (magnitude and phase) for all buses, accommodating a larger number of data points.
+
+Circuit Losses Storage: CircuitLosses is a 
+1440×2 matrix that will capture total circuit losses (likely active and reactive) at each time step.
+
+Transformer Losses: TransformerLosses is initialized similarly to store losses specific to transformers across the same time intervals.
+
+Grid Power: The GridPower matrix captures power metrics related to the grid, with two columns likely representing power imported and exported.
+
+Photovoltaic (PV) Powers: PVInjectedPowers holds the power output from multiple photovoltaic systems, with the number of columns equal to the count of PV systems.
+
+Battery Power Records: The ActiveBatteryPowers and ReactiveBatteryPowers matrices store active and reactive power values for battery systems, facilitating analysis of battery performance.
+
+Load Power Matrices: ActiveLoadPowers and ReactiveLoadPowers are initialized to capture the active and reactive power demands of loads, with 55 representing the number of load elements.
+
+Line Losses: The LineLosses matrix is prepared to record the losses across distribution lines, following a similar structure to other loss matrices.
+
+Transformer Power and Element Losses: TransformerPower is set to store metrics related to transformer performance, while ElementLosses is designed to capture losses for all circuit elements, allowing for comprehensive analysis of active and reactive losses across the system.
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+for i=1:1440 
+        
+        DSSSolution.Solve; 
+       
+        V1(i,:) = DSSCircuit.AllNodeVmagPUByPhase(1); 
+        V2(i,:) = DSSCircuit.AllNodeVmagPUByPhase(2);
+        V3(i,:) = DSSCircuit.AllNodeVmagPUByPhase(3);
+    
+        ComplexVolts(i,:) = DSSCircuit.AllBusVolts;          
+        CircuitLosses(i,:) = DSSCircuit.Losses;            
+        LineLosses(i,:) = DSSCircuit.LineLosses;           
+        ElementLosses(i,:) = DSSCircuit.AllElementLosses;    
+        TransformerLosses(i,:) = DSSCircuit.SubstationLosses;
+        GridPower(i,:) = DSSCircuit.TotalPower;            
+        
+        DSSCircuit.SetActiveElement(['Transformer.tr1']);
+        TransformerPower(i,:) = DSSCircuit.ActiveCktElement.Powers;
+
+
+CODE EXPLANATION:
+Time Loop: The loop iterates from 1 to 1440, representing each minute of the day.
+
+Solve the Circuit: Inside the loop, DSSSolution.Solve is called to compute the circuit's electrical state at each time step, updating the system's status.
+
+Voltage Magnitudes: V1(i,:), V2(i,:), and V3(i,:) store the per-unit voltage magnitudes for each phase of all nodes at minute i, allowing analysis of voltage stability over time.
+
+Complex Bus Voltages: ComplexVolts(i,:) retrieves and stores the complex voltage values for all buses in the circuit, encompassing both magnitude and phase information.
+
+Circuit Losses: CircuitLosses(i,:) captures the total losses in the circuit at minute i, which includes both active and reactive losses.
+
+Line Losses: LineLosses(i,:) records the losses associated with distribution lines for that minute, providing insights into efficiency.
+
+Element Losses: ElementLosses(i,:) stores losses for all elements in the circuit, facilitating detailed performance analysis.
+
+Transformer Losses: TransformerLosses(i,:) retrieves losses specifically related to the substation transformers at that time step
+
+Grid Power: GridPower(i,:) stores the total power metrics (imported or exported) from the grid, providing information on energy exchange.
+
+Transformer Power Data: The DSSCircuit.SetActiveElement(['Transformer.tr1']) command activates a specific transformer element, and TransformerPower(i,:) captures its power output for minute i, allowing for analysis of transformer performance throughout the simulation.
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+if (ID2 == 2 && ID3 ==1)||(ID2 == 2 && ID3 ==2)||(ID2 == 4 && ID3 ==1)||(ID2 == 4 && ID3 ==2)
+    k=1;
+    for count=1:2:55  
+    DSSCircuit.SetActiveElement(['PVSystem.pv_sys_' num2str(count)]);
+    PVInjectedPowers(i,count) = DSSCircuit.ActiveCktElement.Powers(:,1);
+    k=k+1;
+    end
+end
+
+
+if (ID2 == 3 && ID3 ==1)||(ID2 == 3 && ID3 ==2)||(ID2 == 5 && ID3 ==1)||(ID2 == 5 && ID3 ==2)
+    k=1;
+    for count=1:55  
+    DSSCircuit.SetActiveElement(['PVSystem.pv_sys_' num2str(count)]);
+    PVInjectedPowers(i,k) = DSSCircuit.ActiveCktElement.Powers(:,1);
+    k=k+1;
+    end
+end
+
+
+for count=1:55  
+   
+    DSSCircuit.SetActiveElement(['Load.load' num2str(count)]);
+    ActiveLoadPowers(i,count) = DSSCircuit.ActiveCktElement.Powers(:,1);
+    ReactiveLoadPowers(i,count) = DSSCircuit.ActiveCktElement.Powers(:,2);
+    
+end
+
+
+    
+ if (ID2 == 4 && ID3 ==1)||(ID2 == 4 && ID3 ==2) 
+    k=1;
+    for count=1:2:55
+    DSSCircuit.SetActiveElement(['Storage.battery' num2str(count)]);
+    ActiveBatteryPowers(i,k) = DSSCircuit.ActiveCktElement.Powers(:,1);
+    ReactiveBatteryPowers(i,k) = DSSCircuit.ActiveCktElement.Powers(:,2);
+    k=k+1;
+    end
+ end
+ 
+
+  if (ID2 == 5 && ID3 ==1)||(ID2 == 5 && ID3 ==2)    
+    k=1;
+    for count=1:55
+    DSSCircuit.SetActiveElement(['Storage.battery' num2str(count)]);
+    ActiveBatteryPowers(i,k) = DSSCircuit.ActiveCktElement.Powers(:,1);
+    ReactiveBatteryPowers(i,k) = DSSCircuit.ActiveCktElement.Powers(:,2);
+    k=k+1;
+    end
+  end
+
+    end
+
+
+
+CODE EXPLANATON:
+Conditional Check for PV Systems (Case 1): If (ID2 == 2 or 4) and (ID3 == 1 or 2), a loop iterates over odd-numbered PV systems (from 1 to 55), activating each PV system and storing its injected power into PVInjectedPowers(i,:) for the current time step i.
+
+Conditional Check for PV Systems (Case 2): If (ID2 == 3 or 5) and (ID3 == 1 or 2), all PV systems (from 1 to 55) are activated and their power outputs are stored in PVInjectedPowers(i,:), using the index k to track the system number.
+
+Load Power Collection: For all 55 loads, the code retrieves the active and reactive power values using DSSCircuit.SetActiveElement, and stores the values into ActiveLoadPowers(i,:) and ReactiveLoadPowers(i,:) for the current time step.
+
+Conditional Check for Battery Systems (Case 1): If (ID2 == 4) and (ID3 == 1 or 2), the loop processes odd-numbered battery storage systems (from 1 to 55), storing both active and reactive power in ActiveBatteryPowers(i,:) and ReactiveBatteryPowers(i,:).
+
+Conditional Check for Battery Systems (Case 2): If (ID2 == 5) and (ID3 == 1 or 2), the loop processes all battery storage systems (from 1 to 55), recording both active and reactive power.
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+TransformerActivePower = TransformerPower(:,1) + TransformerPower(:,3) + TransformerPower(:,5); 
+TransformerReactivePower = TransformerPower(:,2) + TransformerPower(:,4) + TransformerPower(:,6);
+TransformerApparentPower = abs(TransformerActivePower + j*TransformerReactivePower);
+    
+DSSText.command= 'Set Year=1 ';
+
+
+CODE EXPLANATION:
+Active Power Calculation:
+TransformerActivePower = TransformerPower(:,1) + TransformerPower(:,3) + TransformerPower(:,5);
+This line sums the active power contributions from three transformer windings or phases (columns 1, 3, and 5) to get the total active power for the transformer.
+
+Reactive Power Calculation:
+TransformerReactivePower = TransformerPower(:,2) + TransformerPower(:,4) + TransformerPower(:,6);
+Similarly, it sums the reactive power contributions from the same windings (columns 2, 4, and 6) to get the total reactive power.
+
+Apparent Power Calculation:
+TransformerApparentPower = abs(TransformerActivePower + j*TransformerReactivePower);
+This line calculates the apparent power (in VA), which is the magnitude of the complex power formed by combining the active and reactive power components.
+
+Setting the Simulation Year:
+DSSText.command = 'Set Year=1';
+This command sets the simulation to year 1, which is used to define the time period for yearly simulations in DSS.
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+AggregetedActiveLoadPowers = zeros(1440,1);
+AggregatedActivePVPowers = zeros(1440,1);
+AggregatedActiveBatteryPowers = zeros(1440,1);
+
+[ROWS, COLS] = size(ActiveLoadPowers);
+
+for i=1:ROWS
+    
+        AggregetedActiveLoadPowers(i,:) = sum(ActiveLoadPowers(i,:),'all');
+
+        if (ID2 == 2) || (ID2 == 3) || (ID2 == 4) || (ID2 == 5)
+        AggregatedActivePVPowers(i,:) = sum(PVInjectedPowers(i,:),'all');
+        end
+
+        if (ID2 == 4) || (ID2 == 5)
+        AggregatedActiveBatteryPowers(i,:) = sum(ActiveBatteryPowers(i,:),'all');
+        end
+        
+end
+
+AggragatedLoadPowers - abs(AggragatedPVPowers) +abs(AggragatedBatteryPowers); 
+
+Aggragated_Powers_Figure = figure('Name', ['Aggragated Powers ', sprintf(Scenario,ID1,ID2,ID3,Season) ]);
+plot((1:ROWS)/60,AggregetedActiveLoadPowers,'LineWidth',1,'color',Colour1);
+hold on
+plot((1:ROWS)/60,AggregatedActivePVPowers,'LineWidth',1,'color',Colour2);
+plot((1:ROWS)/60,AggregatedActiveBatteryPowers,'LineWidth',1,'color',Colour3);
+plot((1:ROWS)/60,TransformerActivePower,'LineWidth',1,'color',Colour4);
+
+InSet = get(gca, 'TightInset');
+set(gca, 'Position', [InSet(1)+0.08,InSet(2)+0.05, 1-InSet(1)-InSet(3)-0.14, 1-InSet(2)-InSet(4)-0.13]);
+
+set(gca, 'FontName', 'Times New Roman','FontSize',8,'TickLength', [.03 .03] ,'XMinorTick', 'on','YMinorTick'  , 'on')
+grid on;
+grid minor;
+ylabel('Active Power (kW)','fontweight','bold','FontSize',8)
+ylim([min(AggregatedActivePVPowers)-45, max(AggregetedActiveLoadPowers)+10])
+xlabel('Hour','fontweight','bold','FontSize',8)
+xlim([0 ROWS/60])
+title({'Aggregated PV, Load, Transformer & Storage Powers' sprintf(Scenario,ID1,ID2,ID3,Season)},'FontSize',8)
+legend({'Loads','PVs','Batteries','Transformer'},'location','southwest','AutoUpdate','off','NumColumns',2)
+
+
+CODE EXPLANATION:
+Initialization:
+AggregetedActiveLoadPowers, AggregatedActivePVPowers, and AggregatedActiveBatteryPowers are initialized as zero vectors to store the total active powers for each minute (rows) of the day.
+
+Loop Over Time Steps:
+The loop iterates over each row (time step) of the ActiveLoadPowers matrix.
+
+Sum of Active Load Powers:
+At each time step i, the total active load power is calculated by summing all values in the ActiveLoadPowers(i,:) row and stored in AggregetedActiveLoadPowers(i).
+
+Sum of Active PV Powers:
+If ID2 is 2, 3, 4, or 5, the total active power from PV systems at time step i is summed and stored in AggregatedActivePVPowers(i).
+
+Sum of Active Battery Powers:
+If ID2 is 4 or 5, the total active power from battery systems at time step i is calculated and stored in AggregatedActiveBatteryPowers(i).
+
+Aggregated Power Calculation: The variable AggregatedPowers is calculated by combining the absolute powers of load, PV, and battery systems.
+
+Figure Creation: A figure is created with a title displaying the scenario details (ID1, ID2, ID3, and Season).
+
+Plotting Power Data: Four different power values (active load, PV, battery, and transformer) are plotted over time (in hours) using different colors and line widths.
+
+Axes Formatting: The figure's axes are customized with tight positioning, setting font style to 'Times New Roman', enabling minor ticks, and adjusting tick length.
+
+Grid and Labels: The grid and minor grid are activated, and labels are set for the x-axis (in hours) and y-axis (in kilowatts).
+
+Y-Limits and X-Limits: Y-axis limits are defined based on the min/max values of PV and load powers with a small margin, while the x-axis is set from 0 to the number of rows in minutes divided by 60 (hours).
+
+Title: The plot title describes the content of the figure and scenario details.
+
+Legend: A legend is added to identify the data for loads, PVs, batteries, and transformers, placed in the bottom left with two columns.
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+TotalActiveLineLosses = sum(LineLosses(:,1)/60,'all');
+TotalReactiveLineLosses = sum(LineLosses(:,2)/60,'all');
+
+TotalActiveTransformerLosses = sum(TransformerLosses(:,1)/60,'all');
+TotalReactiveTransformerLosses = sum(TransformerLosses(:,2)/60,'all');
+
+TotalActiveLossesPlot = TotalActiveLineLosses + TotalActiveTransformerLosses;
+TotalReactiveLossesPlot = TotalReactiveLineLosses + TotalReactiveTransformerLosses;
+
+
+StackedTotalLossesPower = [TotalActiveLineLosses,        TotalReactiveLineLosses; 
+                           TotalActiveTransformerLosses, TotalReactiveTransformerLosses;
+                           TotalActiveLossesPlot         TotalReactiveLossesPlot];
+                       
+StackedBarLossesFigure = figure('Name', ['Stacked Bar Chart Losses ', sprintf(Scenario,ID1,ID2,ID3,Season) ]);
+StackedBarLosses = bar(StackedTotalLossesPower,'stacked','LineWidth',2);
+set(StackedBarLosses(1), 'FaceColor', Colour1,'LineWidth',2,'EdgeColor','none');
+set(StackedBarLosses(2), 'FaceColor', Colour2,'LineWidth',2,'EdgeColor','none');
+InSet = get(gca, 'TightInset');
+set(gca, 'Position', [InSet(1)+0.05,InSet(2), 1-InSet(1)-InSet(3)-0.07, 1-InSet(2)-InSet(4)-0.1]);
+
+
+set(gca, 'FontName', 'Times New Roman','FontSize',8,'TickLength', [.03 .03] ,'XMinorTick', 'on','YMinorTick'  , 'on')
+grid on;
+grid minor;
+ylabel('Apparent Energy Losses (kVA hours)','fontweight','bold','FontSize',8)
+title({'Total Transformer & Line Energy Losses - ELVTF ' sprintf(Scenario,ID1,ID2,ID3,Season)},'FontSize',8)
+legend({'Active Energy Losses (kWh)','Reactive Energy Losses (kVArh)'},'location','east','AutoUpdate','off')
+set(gca,'XTickLabel',{'All Lines','Transformer', 'Total Losses'});
+
+
+
+CODE EXPLANATION:
+This MATLAB code calculates and visualizes the total energy losses (active and reactive) for power lines and transformers using a stacked bar chart.
+
+Loss Calculations: The active and reactive losses for lines and transformers are computed by summing the respective columns of the LineLosses and TransformerLosses matrices, dividing by 60 to convert the time units.
+
+TotalActiveLineLosses and TotalReactiveLineLosses for the lines.
+TotalActiveTransformerLosses and TotalReactiveTransformerLosses for the transformers.
+Total Losses: The total active and reactive losses for both lines and transformers are combined into TotalActiveLossesPlot and TotalReactiveLossesPlot.
+
+Stacked Data Array: A matrix, StackedTotalLossesPower, is created to store active and reactive losses for lines, transformers, and their total, in preparation for plotting.
+
+Stacked Bar Plot: A figure is created to display a stacked bar chart for visualizing active and reactive losses. The stacked bar chart is created using the bar() function, plotting the active and reactive losses for lines, transformers, and total losses.
+
+Customizing Bar Colors: The two bars (representing active and reactive losses) are styled with different colors and no edge color, using set() to control their appearance.
+
+Axes Formatting: The figure's axes are adjusted for tight positioning, and additional formatting such as minor ticks and tick lengths are applied.
+
+Grid and Labels: A grid with minor lines is enabled, and labels for the y-axis ("Apparent Energy Losses (kVA hours)") are added to represent energy losses.
+
+Title: The plot title describes the scenario of energy losses for transformers and lines, dynamically including scenario details (ID1, ID2, ID3, and Season).
+
+Legend: A legend is added to differentiate between active (kWh) and reactive (kVArh) energy losses.
+
+X-Tick Labels: The x-axis labels are customized to describe the three categories: 'All Lines', 'Transformer', and 'Total Losses'.
+
+
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+ActiveGridPower = zeros(1440,1);
+ReactiveGridPower = zeros(1440,1);
+
+
+for i=1:length(GridPower)
+    
+    
+    if - GridPower(i,1)>0
+        ActiveGridPower(i) = abs(GridPower(i,1));
+    else
+        ActiveGridPower(i) = 0;
+    end
+    
+    
+    if - GridPower(i,2)>0
+        ReactiveGridPower(i) = abs(GridPower(i,2));
+    else
+        ReactiveGridPower(i) = 0;
+    end
+    
+    if GridPower(i,1)>0
+        ActiveReversePowerFlow(i) = abs(GridPower(i,1));
+    else
+        ActiveReversePowerFlow(i) = 0;
+    end
+end
+
+ActiveReverseEnergy = sum(abs(ActiveReversePowerFlow)/60,'all')
+
+
+PVActiveEnergyGeneration = abs(sum(AggregatedActivePVPowers/60,'all'))
+PVReactiveEnergyGeneration = 0;
+
+TotalActiveTransformerEnergy = sum(abs(TransformerActivePower/60),'all');
+TotalReactiveTransformerEnergy = sum(abs(TransformerReactivePower)/60,'all');
+
+TotalActiveGridEnergy = abs(sum(ActiveGridPower/60,'all'))
+TotalReactiveGridEnergy = abs(sum(ReactiveGridPower/60,'all'));
+
+ActiveLoadEnergy = abs(sum(ActiveLoadPowers/60,'all'))
+ReactiveLoadEnergy = 0;
+
+
+StackedTotalEnergy = [TotalActiveTransformerEnergy,        TotalReactiveTransformerEnergy; 
+                           TotalActiveGridEnergy,               TotalReactiveGridEnergy;
+                           PVActiveEnergyGeneration,            PVReactiveEnergyGeneration
+                           ActiveLoadEnergy                     ReactiveLoadEnergy];
+                       
+StackedBarENERGYFigure = figure('Name', ['Stacked Bar Chart Energy ', sprintf(Scenario,ID1,ID2,ID3,Season) ]);
+StackedBarEnergy = bar(StackedTotalEnergy,'stacked','LineWidth',2);
+set(StackedBarEnergy(1), 'FaceColor', Colour1,'LineWidth',2,'EdgeColor','none');
+set(StackedBarEnergy(2), 'FaceColor', Colour2,'LineWidth',2,'EdgeColor','none');
+InSet = get(gca, 'TightInset');
+set(gca, 'Position', [InSet(1)+0.06,InSet(2), 1-InSet(1)-InSet(3)-0.08, 1-InSet(2)-InSet(4)-0.1]);
+
+
+set(gca, 'FontName', 'Times New Roman','FontSize',8,'TickLength', [.03 .03] ,'XMinorTick', 'on','YMinorTick'  , 'on')
+grid on;
+grid minor;
+ylabel('Apparent Energy (kVA hours)','fontweight','bold','FontSize',8)
+title({'Energy supplied by Grid, PVs & on Transformer' sprintf(Scenario,ID1,ID2,ID3,Season)},'FontSize',8)
+legend({'Active Energy (kWh)','Reactive Energy (kVArh)'},'location','southwest','AutoUpdate','off')
+set(gca,'XTickLabel',{'Transformer','Grid','PVs','Loads'});
+
+
+
+
+CODE EXPLANATION:
+
+
+
+
+This MATLAB code calculates and visualizes the energy supplied by the grid, PVs, and transformers, as well as the energy consumed by the loads, using a stacked bar chart.
+
+1. Grid Power Calculation:
+Pre-allocation: Two arrays, ActiveGridPower and ReactiveGridPower, are initialized with zeros for storing active and reactive grid powers.
+For-loop: Iterates through the GridPower array, extracting and processing power data.
+Active Grid Power: If the negative value of active power (GridPower(i,1)) is positive, its absolute value is assigned to ActiveGridPower, otherwise it's set to zero.
+Reactive Grid Power: Similarly, if the negative value of reactive power (GridPower(i,2)) is positive, its absolute value is assigned to ReactiveGridPower, otherwise zero.
+Active Reverse Power Flow: Captures the power flow in the reverse direction for the grid, where positive values of active power are stored.
+
+2. Energy Calculations:
+Active Reverse Energy: The total energy of reverse power flow is calculated by summing the absolute values of ActiveReversePowerFlow divided by 60 (time conversion to hours).
+PV Energy Generation:
+Active Energy: Calculated by summing AggregatedActivePVPowers, converted into hours.
+Reactive Energy: Set to zero since no reactive energy generation is considered.
+Transformer Energy:
+Active and Reactive Energy: The sum of TransformerActivePower and TransformerReactivePower arrays, divided by 60 for time conversion.
+Grid Energy:
+Active and Reactive Energy: Summed from the ActiveGridPower and ReactiveGridPower arrays, respectively.
+Load Energy:
+Active Energy: Summed from ActiveLoadPowers array.
+Reactive Energy: Set to zero.
+
+3. Stacked Data Array:
+A matrix StackedTotalEnergy is created to store active and reactive energy values for the transformer, grid, PVs, and loads.
+
+
+4. Stacked Bar Plot:
+A figure is created for a stacked bar chart that visualizes the active and reactive energy of the transformer, grid, PVs, and loads.
+Bar Styling: The two components of each bar (active and reactive energy) are assigned different colors using set().
+
+
+5. Axes Formatting:
+Adjustments are made to the figure's axes to position it tightly within the plot area.
+Font settings, minor grid lines, and tick length are adjusted for clarity.
+
+
+6. Grid and Labels:
+The grid is activated, with minor grid lines for better readability.
+The y-axis is labeled as "Apparent Energy (kVA hours)" to represent the energy data.
+
+
+7. Title:
+A title is added to describe the energy supply and consumption by the grid, PVs, transformers, and loads. The title dynamically includes the scenario details (ID1, ID2, ID3, and Season).
+
+
+8. Legend:
+A legend is provided to distinguish between active energy (kWh) and reactive energy (kVArh), placed in the southwest corner location.
+
+
+9. X-Tick Labels:
+The x-axis tick labels are customized to categorize the bars as 'Transformer', 'Grid', 'PVs', and 'Loads', representing different energy sources and consumption.
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+Load_Information = readtable('IEEE_LV_TEST_FEEDER_Load_Info.csv');
+Loads_Connected_to_Bus_No = Load_Information(2,2:end);
+Loads_Connected_to_Bus_No = table2array(Loads_Connected_to_Bus_No);
+
+% Preallocation of matrices for speed
+V1Loads =zeros(1440,55);
+V2Loads =zeros(1440,55);
+V3Loads =zeros(1440,55);
+
+ i=1;
+    for k = Loads_Connected_to_Bus_No
+        %Gets the phase to ground voltage magnitudes at every load
+        V1Loads(:,i) = V1(:,k);
+        V2Loads(:,i) = V2(:,k);
+        V3Loads(:,i) = V3(:,k);
+        i=i+1;
+    end
+
+
+ CODE EXPLANATION:
+
+This MATLAB code extracts and processes voltage data for loads connected to specific buses from a test feeder.
+
+Reading Load Information: The Load_Information table is read from a CSV file (IEEE_LV_TEST_FEEDER_Load_Info.csv). This contains data about the loads connected to different bus numbers.
+
+Extracting Bus Numbers: The bus numbers to which loads are connected are extracted from the second row (ignoring the first column) and converted into an array using table2array().
+
+Preallocation of Matrices: Three matrices (V1Loads, V2Loads, V3Loads) are preallocated with zeros, each of size 1440x55, representing voltage data for three phases at different times (1440 time points) for 55 buses. This improves computation efficiency.
+
+For-loop Iteration: A loop iterates over the array of bus numbers. For each bus number (k), the corresponding phase-to-ground voltage data from V1, V2, and V3 (three phases) are assigned to the respective columns in the V1Loads, V2Loads, and V3Loads matrices.
+
+Incrementing the Counter: The counter i increments with each loop iteration, filling the columns of the voltage matrices.
+
+
+
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+V1XCoor = zeros(1440,907);
+V1YCoor = zeros(1440,907);
+V2XCoor = zeros(1440,907);
+V2YCoor = zeros(1440,907);
+V3XCoor = zeros(1440,907);
+V3YCoor = zeros(1440,907);
+
+
+[CMPLXROWS, CMPLXCOLS] = size(ComplexVolts);
+count =1; %should be 907 
+for i=1:6:CMPLXCOLS
+
+    V1XCoor(:,count) = ComplexVolts(:,i);
+    V1YCoor(:,count) = ComplexVolts(:,i+1);
+    V2XCoor(:,count) = ComplexVolts(:,i+2);
+    V2YCoor(:,count) = ComplexVolts(:,i+3);
+    V3XCoor(:,count) = ComplexVolts(:,i+4);
+    V3YCoor(:,count) = ComplexVolts(:,i+5);
+    count = count+1;
+
+end
+
+V1COMPLEXBUS = V1XCoor+j*V1YCoor;
+V2COMPLEXBUS = V2XCoor+j*V2YCoor;
+V3COMPLEXBUS = V3XCoor+j*V3YCoor;
+
+% Preallocation of matrices for speed
+V1COMPLEXLoads = zeros(1440,55);
+V2COMPLEXLoads = zeros(1440,55);
+V3COMPLEXLoads = zeros(1440,55);
+
+ i=1; 
+    for k = Loads_Connected_to_Bus_No
+        %Gets the phase to ground complexvoltage magnitudes at every load
+        V1COMPLEXLoads(:,i) = V1COMPLEXBUS(:,k);
+        V2COMPLEXLoads(:,i) = V2COMPLEXBUS(:,k);
+        V3COMPLEXLoads(:,i) = V3COMPLEXBUS(:,k);
+        i=i+1;
+    end
+
+a_Fortescue = -0.5 + j*(sqrt(3)/2);
+
+Numerator = abs(V1COMPLEXLoads + ((a_Fortescue^2).*V2COMPLEXLoads) + (a_Fortescue.*V3COMPLEXLoads));
+Denominator = abs(V1COMPLEXLoads + (a_Fortescue.*V2COMPLEXLoads) +((a_Fortescue^2).*V3COMPLEXLoads));
+Unbalance = (Numerator./Denominator)*100; 
+
+
+
+
+CODE EXPLANATION:
+
+This MATLAB code calculates voltage unbalance at each node of a power distribution system based on complex bus voltages and load voltages.
+
+1. Preallocation of Coordinate Matrices:
+Six matrices (V1XCoor, V1YCoor, V2XCoor, V2YCoor, V3XCoor, V3YCoor) are preallocated to hold the real and imaginary parts of complex voltage data for three phases (V1, V2, V3) at each of the 907 nodes over 1440 time intervals. Preallocating matrices improves computational efficiency.
+
+2. Sorting Complex Bus Voltages:
+The size of the ComplexVolts matrix is determined. A loop iterates through the columns of ComplexVolts in steps of 6, assigning the real and imaginary components of each phase's voltages to the corresponding coordinates matrices (V1XCoor, V1YCoor, etc.). Each phase's voltage is paired with its respective x and y coordinates, indexed by count.
+
+3. Creating Complex Voltage Matrices:
+Complex voltage matrices for each phase (V1COMPLEXBUS, V2COMPLEXBUS, V3COMPLEXBUS) are created using the preallocated coordinate matrices. The imaginary unit j is used to combine the real (x-coordinates) and imaginary (y-coordinates) parts into complex numbers.
+
+4. Preallocation for Load Voltages:
+Three additional matrices (V1COMPLEXLoads, V2COMPLEXLoads, V3COMPLEXLoads) are preallocated to store the complex voltages at the loads connected to specific buses.
+
+5. Filling Load Voltage Matrices:
+Another loop iterates over the bus numbers stored in Loads_Connected_to_Bus_No. For each bus number (k), the corresponding complex voltage data for each phase is extracted from the complex bus matrices and stored in the load voltage matrices.
+
+6. Fortescue's Operator:
+Fortescue's operator a_Fortescue is defined as a complex number, which helps in calculating the symmetrical components of the voltages. This operator is crucial for determining the unbalance in the three-phase system.
+
+7. Calculating Unbalance:
+The numerator for the unbalance calculation is computed by summing the complex voltages of all three phases, each multiplied by the appropriate powers of Fortescue's operator.
+The denominator is similarly calculated but with the phases rearranged.
+Voltage unbalance is then computed as the ratio of the numerator to the denominator, multiplied by 100, following the definition according to IEC 61000-3-14 standards.
+
+
+
+
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+[ROWS, COLUMNS] = size(Unbalance);
+
+
+Minutes = [(1:ROWS)/60]';
+LoadNumbers = [1:COLUMNS]';
+
+
+[x, y] = meshgrid(Minutes,LoadNumbers);
+
+
+UnbalancePlotFigure = figure('Name', ['Unabalance(%) at all loads (IEC 61000) ', sprintf(Scenario,ID1,ID2,ID3,Season) ]);
+UnbalancePlot = surf(x,y,(Unbalance)','EdgeColor','none','LineWidth',0.1);
+hold on 
+
+InSet = get(gca, 'TightInset');
+set(gca, 'Position', [InSet(1)+0.08,InSet(2)+0.05, 1-InSet(1)-InSet(3)-0.13, 1-InSet(2)-InSet(4)-0.22]);
+
+
+set(gca, 'FontName', 'Times New Roman','FontSize',8,'TickLength', [.03 .03] ,'XMinorTick', 'on','YMinorTick'  , 'on')
+% set(gca,'zscale','log')
+% grid on;
+colormap(jet)
+shading interp
+grid minor;
+title({'Unbalance at all Loads', '(IEC 61000-3-14 Definition) (1-Min Resolution)' sprintf(Scenario,ID1,ID2,ID3,Season)})
+xlabel('Hour')
+xlim([0 ROWS/60])
+ylabel('Load #')
+ylim([0 COLUMNS])
+zlabel('Unbalance (%)')
+zlim([0, 1])
+
+
+
+
+[ROWS, COLUMNS] = size(V1Loads);
+
+
+Minutes = [(1:ROWS)/60]';
+BusNumbers = [1:COLUMNS]';
+
+
+[x, y] = meshgrid(Minutes,BusNumbers);
+
+ 
+V1_3D_PLOTFigure = figure('Name', ['Phase A Voltage at all Loads ', sprintf(Scenario,ID1,ID2,ID3,Season) ]);
+V1_3D_PLOT = surf(x,y,(V1Loads*240)','EdgeColor','none','LineWidth',0.1);
+hold on 
+
+view(-38,10)
+InSet = get(gca, 'TightInset');
+set(gca, 'Position', [InSet(1)+0.06,InSet(2)+0.08, 1-InSet(1)-InSet(3)-0.09, 1-InSet(2)-InSet(4)-0.25]);
+
+
+set(gca, 'FontName', 'Times New Roman','FontSize',8,'TickLength', [.03 .03] ,'XMinorTick', 'on','YMinorTick'  , 'on')
+% grid on;
+colormap(jet)
+shading interp
+grid minor;
+title({'Phase A Voltage-to-Ground Magnitude', 'at all Loads (1-Min Resolution)' sprintf(Scenario,ID1,ID2,ID3,Season)})
+xlabel('Hour')
+xlim([0 ROWS/60])
+ylabel('Load #')
+ylim([0 COLUMNS])
+zlabel('Voltage Magnitude Phase A to Ground (V)')
+% zlim([0.95 1.01])
+
+
+
+
+
+
+CODE EXPLANATION:
+his MATLAB script generates two 3D surface plots: one for voltage unbalance at all loads and the other for the voltage-to-ground magnitude of Phase A at all loads. Each plot is tailored for specific visualization needs, using a consistent styling format. Here’s a breakdown of what the code does:
+
+1. Unbalance (%) at Each Load Plot
+
+Setup:
+The dimensions of the Unbalance matrix are retrieved to set up the axes for the plot. The x-axis represents time in hours, and the y-axis represents the load numbers.
+The meshgrid function creates matrices for the x and y axes for the 3D plot.
+
+3D Surface Plot:
+A new figure is created to display unbalance percentages at each load.
+The surf function generates a 3D surface plot using the x, y, and transposed unbalance data.
+The TightInset properties are used to fine-tune the position of the axes within the figure.
+
+Plot Styling:
+Various properties such as font name, size, tick lengths, and minor ticks are set for better visualization.
+The colormap is set to 'jet', and interpolation shading is applied to smooth the surface.
+Axis labels, titles, and limits for the x, y, and z axes are specified to provide context.
+
+
+2. Voltage-to-Ground Plot for Phase A
+
+Setup:
+Similar to the unbalance plot, the dimensions of the V1Loads matrix are retrieved to set up the axes, with the x-axis representing time and the y-axis denoting the bus/load numbers.
+The meshgrid function creates matrices for plotting.
+
+3D Surface Plot:
+A new figure is created to display the Phase A voltage-to-ground magnitude at all loads.
+A surface plot of Phase A voltage-to-ground magnitudes (scaled appropriately) is generated.
+The view angle for the plot is set for better visualization, and the axes' position is refined.
+
+Plot Styling:
+Consistent styling with the previous plot is applied. Font properties, tick lengths, and colormap adjustments (using 'jet' with interpolation shading) are employed.
+
+The title, axis labels, and limits are set to clarify what the plot represents.
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+[ROWS, COLUMNS] = size(V1Loads);
+
+
+Minutes = [(1:ROWS)/60]';
+BusNumbers = [1:COLUMNS]';
+
+
+[x, y] = meshgrid(Minutes,BusNumbers);
+
+ 
+V1_3D_PLOTFigure2 = figure('Name', ['Phase A Voltage at all Loads X-Axis', sprintf(Scenario,ID1,ID2,ID3,Season) ]);
+V1_3D_PLOT2 = surf(x,y,(V1Loads*240)','EdgeColor','none','LineWidth',0.1);
+hold on 
+
+view(0,0)
+InSet = get(gca, 'TightInset');
+set(gca, 'Position', [InSet(1)+0.06,InSet(2)+0.08, 1-InSet(1)-InSet(3)-0.12, 1-InSet(2)-InSet(4)-0.25]);
+
+
+
+set(gca, 'FontName', 'Times New Roman','FontSize',8,'TickLength', [.03 .03] ,'XMinorTick', 'on','YMinorTick'  , 'on')
+% grid on;
+colormap(jet)
+shading interp
+grid minor;
+title({'Phase A Voltage-to-Ground Magnitude', 'at all Loads (1-Min Resolution)' sprintf(Scenario,ID1,ID2,ID3,Season)})
+xlabel('Hour')
+xlim([0 ROWS/60])
+ylabel('Load #')
+ylim([0 COLUMNS])
+zlabel('Voltage Magnitude Phase A to Ground (V)')
+% zlim([0.95 1.01])
+
+
+[ROWS, COLUMNS] = size(V2Loads);
+
+Minutes = [(1:ROWS)/60]';
+BusNumbers = [1:COLUMNS]';
+
+
+[x, y] = meshgrid(Minutes,BusNumbers);
+
+
+V2_3D_PLOTFigure = figure('Name', ['Phase B Voltage at all Loads ', sprintf(Scenario,ID1,ID2,ID3,Season) ]);
+V2_3D_PLOT = surf(x,y,(V2Loads*240)','EdgeColor','none','LineWidth',0.1);
+hold on 
+
+view(-38,10)
+InSet = get(gca, 'TightInset');
+set(gca, 'Position', [InSet(1)+0.06,InSet(2)+0.08, 1-InSet(1)-InSet(3)-0.09, 1-InSet(2)-InSet(4)-0.25]);
+
+
+set(gca, 'FontName', 'Times New Roman','FontSize',8,'TickLength', [.03 .03] ,'XMinorTick', 'on','YMinorTick'  , 'on')
+% grid on;
+colormap(jet)
+shading interp
+grid minor;
+title({'Phase B Voltage-to-Ground Magnitude', 'at all Loads (1-Min Resolution)' sprintf(Scenario,ID1,ID2,ID3,Season)})
+xlabel('Hour')
+xlim([0 ROWS/60])
+ylabel('Load #')
+ylim([0 COLUMNS])
+zlabel('Voltage Magnitude Phase B to Ground (V)')
+% zlim([0.95 1.01])
+
+
+
+
+
+CODE EXPLANATION:
+This MATLAB script generates 3D surface plots to visualize the voltage-to-ground magnitude for Phases A and B at all loads across time. The script follows a structured approach for generating each plot with appropriate axis labels, titles, and formatting.
+
+1.Phase A Voltage-to-Ground (X-Axis View)
+
+Matrix Setup:
+The size of V1Loads (Phase A voltage data) is determined to establish the x-axis (time in hours) and y-axis (load numbers).
+The meshgrid function is used to create x and y matrices to plot the surface.
+
+3D Surface Plot:
+A figure is created, and the voltage magnitude (scaled by multiplying V1Loads by 240) is plotted using surf().
+The view angle is set to display the X-axis for a better visualization of the plot along the time axis (view set to view(0,0)).
+The position of the plot inside the figure is adjusted using the TightInset method.
+
+Plot Styling:
+Font settings, tick length, and minor ticks are specified for aesthetic consistency.
+The colormap is set to 'jet', and shading interpolation is applied to smooth the surface.
+Axis labels and title are added, along with x and y limits, and a z-label for voltage magnitude is specified.
+
+
+2.Phase B Voltage-to-Ground Plot
+
+Matrix Setup:
+Similar to the Phase A plot, the size of V2Loads (Phase B voltage data) is determined, and x (time) and y (load numbers) axes are set using meshgrid().
+
+3D Surface Plot:
+A new figure is created, and the Phase B voltage magnitude (V2Loads * 240) is plotted using surf().
+The view angle is set to an oblique perspective (view(-38,10)) for better visualization of the voltage variation across loads and time.
+Plot positioning is adjusted for clarity using TightInset.
+
+Plot Styling:
+Font settings, tick length, and minor ticks are again customized for clarity.
+The colormap is set to 'jet', and shading interpolation is applied.
+Titles, axis labels, and plot limits are added for interpretation of the data, showing voltage magnitude in Phase B.
+
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+[ROWS, COLUMNS] = size(V2Loads);
+
+
+Minutes = [(1:ROWS)/60]';
+BusNumbers = [1:COLUMNS]';
+
+
+[x, y] = meshgrid(Minutes,BusNumbers);
+
+
+V2_3D_PLOTFigure2 = figure('Name', ['Phase B Voltage at all Loads X-Axis', sprintf(Scenario,ID1,ID2,ID3,Season) ]);
+V2_3D_PLOT2 = surf(x,y,(V2Loads*240)','EdgeColor','none','LineWidth',0.1);
+hold on 
+
+view(0,0)
+InSet = get(gca, 'TightInset');
+set(gca, 'Position', [InSet(1)+0.06,InSet(2)+0.08, 1-InSet(1)-InSet(3)-0.12, 1-InSet(2)-InSet(4)-0.25]);
+
+
+set(gca, 'FontName', 'Times New Roman','FontSize',8,'TickLength', [.03 .03] ,'XMinorTick', 'on','YMinorTick'  , 'on')
+% grid on;
+colormap(jet)
+shading interp
+grid minor;
+title({'Phase B Voltage-to-Ground Magnitude', 'at all Loads (1-Min Resolution)' sprintf(Scenario,ID1,ID2,ID3,Season)})
+xlabel('Hour')
+xlim([0 ROWS/60])
+ylabel('Load #')
+ylim([0 COLUMNS])
+zlabel('Voltage Magnitude Phase B to Ground (V)')
+
+
+
+[ROWS, COLUMNS] = size(V3Loads);
+
+
+Minutes = [(1:ROWS)/60]';
+BusNumbers = [1:COLUMNS]';
+
+[x, y] = meshgrid(Minutes,BusNumbers);
+
+
+V3_3D_PLOTFigure = figure('Name', ['Phase C Voltage at all Loads ', sprintf(Scenario,ID1,ID2,ID3,Season) ]);
+V3_3D_PLOT = surf(x,y,(V3Loads*240)','EdgeColor','none','LineWidth',0.1);
+hold on 
+
+view(-38,10)
+InSet = get(gca, 'TightInset');
+set(gca, 'Position', [InSet(1)+0.06,InSet(2)+0.08, 1-InSet(1)-InSet(3)-0.09, 1-InSet(2)-InSet(4)-0.25]);
+
+
+set(gca, 'FontName', 'Times New Roman','FontSize',8,'TickLength', [.03 .03] ,'XMinorTick', 'on','YMinorTick'  , 'on')
+% grid on;
+colormap(jet)
+shading interp
+grid minor;
+title({'Phase C Voltage-to-Ground Magnitude', 'at all Loads (1-Min Resolution)' sprintf(Scenario,ID1,ID2,ID3,Season)})
+xlabel('Hour')
+xlim([0 ROWS/60])
+ylabel('Load #')
+ylim([0 COLUMNS])
+zlabel('Voltage Magnitude Phase C to Ground (V)')
+% zlim([0.95 1.01])
+
+
+
+
+[ROWS, COLUMNS] = size(V3Loads);
+
+
+Minutes = [(1:ROWS)/60]';
+BusNumbers = [1:COLUMNS]';
+
+[x, y] = meshgrid(Minutes,BusNumbers);
+
+
+V3_3D_PLOTFigure2 = figure('Name', ['Phase C Voltage at all Loads X-Axis', sprintf(Scenario,ID1,ID2,ID3,Season) ]);
+V3_3D_PLOT2 = surf(x,y,(V3Loads*240)','EdgeColor','none','LineWidth',0.1);
+hold on 
+
+view(0,0)
+InSet = get(gca, 'TightInset');
+set(gca, 'Position', [InSet(1)+0.06,InSet(2)+0.08, 1-InSet(1)-InSet(3)-0.12, 1-InSet(2)-InSet(4)-0.25]);
+
+
+set(gca, 'FontName', 'Times New Roman','FontSize',8,'TickLength', [.03 .03] ,'XMinorTick', 'on','YMinorTick'  , 'on')
+% grid on;
+colormap(jet)
+shading interp
+grid minor;
+title({'Phase C Voltage-to-Ground Magnitude', 'at all Loads (1-Min Resolution)' sprintf(Scenario,ID1,ID2,ID3,Season)})
+xlabel('Hour')
+xlim([0 ROWS/60])
+ylabel('Load #')
+ylim([0 COLUMNS])
+zlabel('Voltage Magnitude Phase C to Ground (V)')
+
+
+
+CODE EXPLANATION:
+This MATLAB script generates multiple 3D surface plots to visualize the voltage-to-ground magnitudes for Phases B and C at different loads over time, focusing on both standard views and X-axis specific views. The script includes plot styling, axis settings, and meshgrid generation for plotting.
+
+1)Phase B Voltage-to-Ground (X-Axis View)
+Matrix Setup:
+The size of V2Loads (Phase B voltage data) is determined, and time (in hours) and load numbers are set as x and y axes using meshgrid().
+
+3D Surface Plot:
+A figure is created, and the voltage magnitude for Phase B (V2Loads * 240, scaling factor applied) is plotted using surf() for the X-axis view.
+The view angle is set to focus on the X-axis using view(0,0) to visualize how voltage varies over time.
+
+Plot Styling:
+Plot positioning is adjusted using TightInset to ensure the graph is well-centered.
+Font settings, tick marks, and colormap (jet) are customized.
+Title, axis labels (hour for x-axis, load number for y-axis, and voltage magnitude for z-axis) are added for clarity.
+
+
+2)Phase C Voltage-to-Ground Plot
+Matrix Setup:
+The size of V3Loads (Phase C voltage data) is used to create x (time in hours) and y (load number) axes with meshgrid().
+
+3D Surface Plot:
+A new figure is created to plot Phase C voltage magnitudes (V3Loads * 240) using surf().
+The view is set to an oblique angle (view(-38,10)) to display voltage variations across loads and time.
+
+Plot Styling:
+Font size, tick marks, colormap, and shading interpolation are configured.
+Title, x-axis (hour), y-axis (load number), and z-axis (voltage magnitude) labels are set.
+The figure's positioning is adjusted to ensure proper layout.
+
+3)Phase C Voltage-to-Ground (X-Axis View)
+Matrix Setup:
+Similar to the above, V3Loads is used to set time and load number axes via meshgrid().
+
+3D Surface Plot:
+A separate figure is created for the X-axis view of Phase C voltages. The surf() function is used, and view(0,0) sets the plot to focus on how the voltage varies over time.
+
+Plot Styling:
+The plot's positioning is adjusted using TightInset to center it.
+The same styling adjustments are applied, with custom font settings, colormap, shading interpolation, and labels for all axes.
+
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+TransformerLoadingFig = figure('Name', ['Transformer Loading ', sprintf(Scenario,ID1,ID2,ID3,Season) ]);
+bar((1:ROWS)/60,TransformerApparentPower,'LineWidth',1,'Facecolor',Colour1)
+hold on
+bar((1:ROWS)/60,TransformerActivePower,'LineWidth',1,'FaceColor',Colour2)
+bar((1:ROWS)/60,TransformerReactivePower,'LineWidth',1,'Facecolor',Colour3)
+
+InSet = get(gca, 'TightInset');
+set(gca, 'Position', [InSet(1)+0.07,InSet(2)+0.06, 1-InSet(1)-InSet(3)-0.15, 1-InSet(2)-InSet(4)-0.15]);
+
+
+set(gca, 'FontName', 'Times New Roman','FontSize',8,'TickLength', [.03 .03] ,'XMinorTick', 'on','YMinorTick'  , 'on')
+grid on;
+grid minor;
+ylabel('Transformer Loading (Active & Reactive Power)','fontweight','bold','FontSize',8)
+ylim([min(TransformerActivePower)-65, max(TransformerApparentPower)+10])
+xlabel('Hour','fontweight','bold','FontSize',8)
+xlim([0 ROWS/60])
+title({'Transformer Loading (Active & Reactive Power) - ELVTF ' sprintf(Scenario,ID1,ID2,ID3,Season)},'FontSize',8)
+legend({'Apparent Power (kVA) (Magnitude)','Active Power (kW)','Reactive Power (kVAr)'},'location','southwest','FontSize',8,'AutoUpdate','off')
+
+
+
+
+
+[ROWS, COLUMNS] = size(TransformerActivePower);
+
+CumulativeTransformerEnergy_kWh =zeros(ROWS,1);
+
+for c = 1:ROWS
+    
+    if c==1
+    CumulativeTransformerEnergy_kWh(c) = abs(TransformerActivePower(c)/60);
+    end
+    
+    if c >1
+    CumulativeTransformerEnergy_kWh(c) = abs(TransformerActivePower(c)/60) + CumulativeTransformerEnergy_kWh(c-1);
+    end
+    
+end
+
+CumulativeEnergyFigure = figure('Name', ['Cumulative Transformer Energy ', sprintf(Scenario,ID1,ID2,ID3,Season) ]);
+plot((1:ROWS)/60,CumulativeTransformerEnergy_kWh,'LineWidth',2,'color',Colour1);
+
+
+set(gca, 'FontName', 'Times New Roman','FontSize',8,'TickLength', [.03 .03] ,'XMinorTick', 'on','YMinorTick'  , 'on')
+grid on;
+grid minor;
+ylabel('Transformer Cumulative Energy (kWh)','fontweight','bold','FontSize',8)
+xlabel('Hour','fontweight','bold','FontSize',8)
+xlim([0 ROWS/60])
+title({'Transformer Cumulative Energy Vs. Time - ELVTF ' sprintf(Scenario,ID1,ID2,ID3,Season)},'FontSize',8)
+% legend({'Active Power(kW)'},'location','northwest','AutoUpdate','off')
+
+
+
+
+CODE EXPLANATION:
+
+
+This MATLAB code generates two plots related to transformer loading and energy over time. The first plot shows transformer loading in terms of apparent, active, and reactive power, while the second plot displays cumulative energy consumption by the transformer over the course of a day.
+
+1)True Transformer Loading Power Plot
+Bar Graph Setup:
+A figure named 'Transformer Loading' is created.
+Three sets of bar plots are generated to represent:
+Apparent Power (TransformerApparentPower in kVA, plotted in Colour1).
+Active Power (TransformerActivePower in kW, plotted in Colour2).
+Reactive Power (TransformerReactivePower in kVAr, plotted in Colour3).
+The x-axis represents time in hours (converted from minutes), while the y-axis displays power values.
+
+Plot Positioning:
+The plot is adjusted for proper positioning using TightInset to ensure the figure fits well within the window.
+
+Styling the Plot:
+Custom font (Times New Roman), font size, and tick marks are applied to the plot.
+A minor grid is enabled to enhance the visibility of the plot’s data points.
+Y-axis is labeled 'Transformer Loading (Active & Reactive Power)', showing power values for each type.
+The y-axis limits are set to range from slightly below the minimum active power to a little above the maximum apparent power, ensuring all values are clearly visible.
+X-axis is labeled 'Hour' to represent time, and the limits are set to show the entire time range (0 to ROWS/60 hours).
+A title is added, indicating the scenario details for the plot.
+A legend is added to distinguish between apparent power (kVA), active power (kW), and reactive power (kVAr), and is placed at the southwest corner of the plot.
+
+2)Transformer Cumulative Energy Plot
+Cumulative Energy Calculation:
+The script initializes a matrix (CumulativeTransformerEnergy_kWh) to store the cumulative energy consumed by the transformer over the day.
+A for loop is used to calculate cumulative energy:
+For the first time step (c == 1), energy is computed as abs(TransformerActivePower(c) / 60) because the time resolution is in minutes (thus dividing by 60).
+For subsequent time steps (c > 1), the energy for the current step is added to the previously calculated cumulative energy (CumulativeTransformerEnergy_kWh(c-1)).
+
+Cumulative Energy Plot:
+A new figure is created, titled 'Cumulative Transformer Energy'.
+A line plot of the cumulative transformer energy over time is generated, with time on the x-axis (hours) and cumulative energy on the y-axis (kWh).
+The line width is set to 2, and the plot color is specified by Colour1.
+
+Plot Styling:
+As in the previous plot, the font is set to Times New Roman, with minor ticks enabled on both axes.
+A minor grid is enabled.
+The Y-axis is labeled 'Transformer Cumulative Energy (kWh)'.
+The X-axis is labeled 'Hour', and limits are set to cover the entire time period.
+A title is added to indicate the scenario for the plot.
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+TransformerEnergyTimeFig = figure('Name', ['Transformer Energy Vs. Time ', sprintf(Scenario,ID1,ID2,ID3,Season) ]);
+bar((1:ROWS)/60,abs(TransformerActivePower/60),'FaceColor',Colour1)
+
+
+set(gca, 'FontName', 'Times New Roman','FontSize',8,'TickLength', [.03 .03] ,'XMinorTick', 'on','YMinorTick'  , 'on')
+grid on;
+grid minor;
+ylabel('Transformer Energy (kWh)','fontweight','bold','FontSize',8)
+xlabel('Hour','fontweight','bold','FontSize',8)
+xlim([0 ROWS/60])
+title({'Transformer Energy Vs. Time - ELVTF ' sprintf(Scenario,ID1,ID2,ID3,Season)},'FontSize',8)
+% legend({'Active Power(kW)'},'location','northwest','AutoUpdate','off')
+
+
+LossesFigure = figure('Name', ['Transformer & Line Losses ', sprintf(Scenario,ID1,ID2,ID3,Season) ]);
+bar((1:ROWS)/60,LineLosses(:,1),'LineWidth',1,'Facecolor',Colour1)
+hold on
+bar((1:ROWS)/60,TransformerLosses(:,2),'LineWidth',1,'Facecolor',Colour2)
+bar((1:ROWS)/60,LineLosses(:,2),'LineWidth',1,'Facecolor',Colour4)
+bar((1:ROWS)/60,TransformerLosses(:,1),'LineWidth',1,'Facecolor',Colour3)
+
+InSet = get(gca, 'TightInset');
+set(gca, 'Position', [InSet(1)+0.06,InSet(2)+0.06, 1-InSet(1)-InSet(3)-0.1, 1-InSet(2)-InSet(4)-0.15]);
+
+
+set(gca, 'FontName', 'Times New Roman','FontSize',8,'TickLength', [.03 .03] ,'XMinorTick', 'on','YMinorTick'  , 'on')
+grid on;
+grid minor;
+ylabel('Power Losses','fontweight','bold','FontSize',8)
+ylim([0 max(LineLosses(:,1))+0.7])
+xlabel('Hour','fontweight','bold','FontSize',8)
+xlim([0 ROWS/60])
+title({'Transformer & Line Losses - ELVTF ' sprintf(Scenario,ID1,ID2,ID3,Season)},'FontSize',8)
+legend({'Active Line Losses (kW)','Transformer Reactive Losses (kVAr)', 'Reactive Line Losses (kVAr)','Transformer Active Losses (kW)'},'location','northwest','AutoUpdate','off')
+
+
+
+CODE EXPLANATION:
+
+1. Transformer Energy Bar Chart
+The first section of the code plots the energy consumed by the transformer over time, represented in kWh.
+
+Bar Chart Setup:
+A figure named 'Transformer Energy Vs. Time' is created.
+A bar chart is generated using the bar function, where the x-axis represents time in hours (calculated as ROWS/60) and the y-axis represents transformer energy consumption, calculated as abs(TransformerActivePower / 60) (the absolute value of the active power divided by 60 to convert it to kWh).
+TransformerActivePower is divided by 60 to convert power from minutes into energy in kilowatt-hours (kWh).
+The color of the bars is specified by Colour1.
+
+Plot Styling:
+Custom fonts (Times New Roman) and a font size of 8 are applied.
+X-axis and Y-axis minor ticks are enabled for better readability.
+A minor grid is added to the plot for clarity.
+Y-axis is labeled 'Transformer Energy (kWh)' to represent the energy consumed over time.
+X-axis is labeled 'Hour', and the limits are set from 0 to ROWS/60 (total hours in the time period).
+A title is added to include the scenario information.
+The legend line is commented out, meaning no legend will appear for this plot.
+
+2. Transformer & Line Losses Plot
+This section generates a bar plot to visualize the losses in both the transformer and the power lines over time.
+
+Bar Chart Setup:
+A new figure named 'Transformer & Line Losses' is created.
+Four sets of bar plots are generated to represent different types of losses:
+Active Line Losses (LineLosses(:,1), plotted in Colour1): Power losses in the line due to active power.
+Transformer Reactive Losses (TransformerLosses(:,2), plotted in Colour2): Power losses in the transformer due to reactive power.
+Reactive Line Losses (LineLosses(:,2), plotted in Colour4): Power losses in the line due to reactive power.
+Transformer Active Losses (TransformerLosses(:,1), plotted in Colour3): Power losses in the transformer due to active power.
+
+Plot Positioning:
+The position of the plot within the figure window is adjusted using TightInset to ensure it fits well with proper margins.
+
+Plot Styling:
+Fonts (Times New Roman), font size, and tick lengths are customized for both axes.
+Minor ticks and grids are enabled for better clarity and readability.
+Y-axis is labeled 'Power Losses', showing the magnitude of the losses.
+The Y-axis limits are set to range from 0 to slightly above the maximum value of LineLosses(:,1) plus a small margin of 0.7 for clarity.
+X-axis is labeled 'Hour', and its limits are set to the total hours in the dataset.
+A title is added to include the scenario details.
+A legend is provided to differentiate between active line losses, transformer reactive losses, reactive line losses, and transformer active losses, placed in the northwest corner location.
+
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+%% Interactive & Regular Plot Exports (Comment this section out if not exporting plots) 
+
+% saveas(StackedBarLossesFigure, ['C:\Users\bajai\Documents\GitHub\MSc-Project---Impact-of-PV-and-Battery-Storage-on-Distribution-System\Plots\Interactive (MATLAB) Plots\Stacked_Bar_Chart_Losses_Plot_' sprintf(Scenario,ID1,ID2,ID3,Season) '.fig'], 'fig');
+% saveas(StackedBarENERGYFigure, ['C:\Users\bajai\Documents\GitHub\MSc-Project---Impact-of-PV-and-Battery-Storage-on-Distribution-System\Plots\Interactive (MATLAB) Plots\Total_Grid_and_Transformer_Energy_Plot_' sprintf(Scenario,ID1,ID2,ID3,Season) '.fig'], 'fig');
+% saveas(UnbalancePlotFigure, ['C:\Users\bajai\Documents\GitHub\MSc-Project---Impact-of-PV-and-Battery-Storage-on-Distribution-System\Plots\Interactive (MATLAB) Plots\3_Phase_Unbalance_Plot_' sprintf(Scenario,ID1,ID2,ID3,Season) '.fig'], 'fig');
+% saveas(V1_3D_PLOTFigure, ['C:\Users\bajai\Documents\GitHub\MSc-Project---Impact-of-PV-and-Battery-Storage-on-Distribution-System\Plots\Interactive (MATLAB) Plots\Phase_A_3D_Voltage_Magnitude_Plot_' sprintf(Scenario,ID1,ID2,ID3,Season) '.fig'], 'fig');
+% saveas(V2_3D_PLOTFigure, ['C:\Users\bajai\Documents\GitHub\MSc-Project---Impact-of-PV-and-Battery-Storage-on-Distribution-System\Plots\Interactive (MATLAB) Plots\Phase_B_3D_Voltage_Magnitude_Plot_' sprintf(Scenario,ID1,ID2,ID3,Season) '.fig'], 'fig');
+% saveas(V3_3D_PLOTFigure, ['C:\Users\bajai\Documents\GitHub\MSc-Project---Impact-of-PV-and-Battery-Storage-on-Distribution-System\Plots\Interactive (MATLAB) Plots\Phase_C_3D_Voltage_Magnitude_Plot_' sprintf(Scenario,ID1,ID2,ID3,Season) '.fig'], 'fig');
+% saveas(TransformerLoadingFig, ['C:\Users\bajai\Documents\GitHub\MSc-Project---Impact-of-PV-and-Battery-Storage-on-Distribution-System\Plots\Interactive (MATLAB) Plots\Transformer_Loading_Plot_' sprintf(Scenario,ID1,ID2,ID3,Season) '.fig'], 'fig');
+% saveas(CumulativeEnergyFigure, ['C:\Users\bajai\Documents\GitHub\MSc-Project---Impact-of-PV-and-Battery-Storage-on-Distribution-System\Plots\Interactive (MATLAB) Plots\Transformer_Cumulative_Energy_Plot_' sprintf(Scenario,ID1,ID2,ID3,Season) '.fig'], 'fig');
+% saveas(TransformerEnergyTimeFig, ['C:\Users\bajai\Documents\GitHub\MSc-Project---Impact-of-PV-and-Battery-Storage-on-Distribution-System\Plots\Interactive (MATLAB) Plots\Transformer_Energy_VS_Time_Plot_' sprintf(Scenario,ID1,ID2,ID3,Season) '.fig'], 'fig');
+% saveas(LossesFigure, ['C:\Users\bajai\Documents\GitHub\MSc-Project---Impact-of-PV-and-Battery-Storage-on-Distribution-System\Plots\Interactive (MATLAB) Plots\Power_Losses_VS_Time_Plot_' sprintf(Scenario,ID1,ID2,ID3,Season) '.fig'], 'fig');
+% saveas(Aggragated_Powers_Figure, ['C:\Users\bajai\Documents\GitHub\MSc-Project---Impact-of-PV-and-Battery-Storage-on-Distribution-System\Plots\Interactive (MATLAB) Plots\Aggragated_Powers_VS_Time_Plot_' sprintf(Scenario,ID1,ID2,ID3,Season) '.fig'], 'fig');
+% 
+% Aggragated_Powers_Figure.PaperUnits = 'inches';
+% Aggragated_Powers_Figure.PaperPosition = [0 0 3 2.5];
+% print(Aggragated_Powers_Figure, ['C:\Users\bajai\Documents\GitHub\MSc-Project---Impact-of-PV-and-Battery-Storage-on-Distribution-System\Plots\Non-interactive Plots (PNG)\Aggragated_Powers_VS_Time_Plot_' sprintf(Scenario,ID1,ID2,ID3,Season) '.png'], '-dpng','-r600');
+% 
+% StackedBarLossesFigure.PaperUnits = 'inches';
+% StackedBarLossesFigure.PaperPosition = [0 0 3 2.5];
+% print(StackedBarLossesFigure, ['C:\Users\bajai\Documents\GitHub\MSc-Project---Impact-of-PV-and-Battery-Storage-on-Distribution-System\Plots\Non-interactive Plots (PNG)\Stacked_Bar_Chart_Losses_Plot_' sprintf(Scenario,ID1,ID2,ID3,Season) '.png'], '-dpng','-r600');
+% 
+% StackedBarENERGYFigure.PaperUnits = 'inches';
+% StackedBarENERGYFigure.PaperPosition = [0 0 3 2.5];
+% print(StackedBarENERGYFigure, ['C:\Users\bajai\Documents\GitHub\MSc-Project---Impact-of-PV-and-Battery-Storage-on-Distribution-System\Plots\Non-interactive Plots (PNG)\Total_Grid_and_Transformer_Energy_Plot_' sprintf(Scenario,ID1,ID2,ID3,Season) '.png'], '-dpng','-r600');
+% 
+% UnbalancePlotFigure.PaperUnits = 'inches';
+% UnbalancePlotFigure.PaperPosition = [0 0 3 2.5];
+% print(UnbalancePlotFigure, ['C:\Users\bajai\Documents\GitHub\MSc-Project---Impact-of-PV-and-Battery-Storage-on-Distribution-System\Plots\Non-interactive Plots (PNG)\3_Phase_Unbalance_Plot_' sprintf(Scenario,ID1,ID2,ID3,Season) '.png'], '-dpng','-r600');
+% 
+% V1_3D_PLOTFigure.PaperUnits = 'inches';
+% V1_3D_PLOTFigure.PaperPosition = [0 0 3 2.5];
+% print(V1_3D_PLOTFigure, ['C:\Users\bajai\Documents\GitHub\MSc-Project---Impact-of-PV-and-Battery-Storage-on-Distribution-System\Plots\Non-interactive Plots (PNG)\Phase_A_3D_Voltage_Magnitude_Plot_' sprintf(Scenario,ID1,ID2,ID3,Season) '.png'], '-dpng','-r600');
+% 
+% V1_3D_PLOTFigure2.PaperUnits = 'inches';
+% V1_3D_PLOTFigure2.PaperPosition = [0 0 3 2.5];
+% print(V1_3D_PLOTFigure2, ['C:\Users\bajai\Documents\GitHub\MSc-Project---Impact-of-PV-and-Battery-Storage-on-Distribution-System\Plots\Non-interactive Plots (PNG)\Phase_A_3D_Voltage_Magnitude_Plot_x_Axis_' sprintf(Scenario,ID1,ID2,ID3,Season) '.png'], '-dpng','-r600');
+% 
+% V2_3D_PLOTFigure.PaperUnits = 'inches';
+% V2_3D_PLOTFigure.PaperPosition = [0 0 3 2.5];
+% print(V2_3D_PLOTFigure, ['C:\Users\bajai\Documents\GitHub\MSc-Project---Impact-of-PV-and-Battery-Storage-on-Distribution-System\Plots\Non-interactive Plots (PNG)\Phase_B_3D_Voltage_Magnitude_Plot_' sprintf(Scenario,ID1,ID2,ID3,Season) '.png'], '-dpng','-r600');
+% 
+% V2_3D_PLOTFigure2.PaperUnits = 'inches';
+% V2_3D_PLOTFigure2.PaperPosition = [0 0 3 2.5];
+% print(V2_3D_PLOTFigure2, ['C:\Users\bajai\Documents\GitHub\MSc-Project---Impact-of-PV-and-Battery-Storage-on-Distribution-System\Plots\Non-interactive Plots (PNG)\Phase_B_3D_Voltage_Magnitude_Plot_x_Axis_' sprintf(Scenario,ID1,ID2,ID3,Season) '.png'], '-dpng','-r600');
+% 
+% V3_3D_PLOTFigure.PaperUnits = 'inches';
+% V3_3D_PLOTFigure.PaperPosition = [0 0 3 2.5];
+% print(V3_3D_PLOTFigure, ['C:\Users\bajai\Documents\GitHub\MSc-Project---Impact-of-PV-and-Battery-Storage-on-Distribution-System\Plots\Non-interactive Plots (PNG)\Phase_C_3D_Voltage_Magnitude_Plot_' sprintf(Scenario,ID1,ID2,ID3,Season) '.png'], '-dpng','-r600');
+
+% V3_3D_PLOTFigure2.PaperUnits = 'inches';
+% V3_3D_PLOTFigure2.PaperPosition = [0 0 3 2.5];
+% print(V3_3D_PLOTFigure2, ['C:\Users\bajai\Documents\GitHub\MSc-Project---Impact-of-PV-and-Battery-Storage-on-Distribution-System\Plots\Non-interactive Plots (PNG)\Phase_C_3D_Voltage_Magnitude_Plot_x_Axis_' sprintf(Scenario,ID1,ID2,ID3,Season) '.png'], '-dpng','-r600');
+
+% TransformerLoadingFig.PaperUnits = 'inches';
+% TransformerLoadingFig.PaperPosition = [0 0 3 2.5];
+% print(TransformerLoadingFig, ['C:\Users\bajai\Documents\GitHub\MSc-Project---Impact-of-PV-and-Battery-Storage-on-Distribution-System\Plots\Non-interactive Plots (PNG)\Transformer_Loading_VS_Time_' sprintf(Scenario,ID1,ID2,ID3,Season) '.png'], '-dpng','-r600');
+
+% LossesFigure.PaperUnits = 'inches';
+% LossesFigure.PaperPosition = [0 0 3 2.5];
+% print(LossesFigure, ['C:\Users\bajai\Documents\GitHub\MSc-Project---Impact-of-PV-and-Battery-Storage-on-Distribution-System\Plots\Non-interactive Plots (PNG)\Transformer_Line_Losses_VS_Time_' sprintf(Scenario,ID1,ID2,ID3,Season) '.png'], '-dpng','-r600');
+
+
+
+
+
+CODE EXPLANATION:
+This section of the MATLAB code is responsible for exporting the generated plots into two formats: interactive MATLAB figures (.fig) and non-interactive image files (PNG).
+
+Interactive Plot Export:
+The interactive figures are saved as .fig files. This format allows users to open, interact with, and modify the plots within MATLAB. For instance, you can zoom in, rotate, or change plot properties like labels and colors.
+Each figure is given a unique filename that includes details like the scenario and specific identifiers (such as ID1, ID2, ID3, and Season) to ensure that plots from different simulations or data sets are clearly labeled and easy to manage.
+
+Non-Interactive PNG Export:
+In addition to .fig files, the plots are also saved as .png images. These are non-editable, high-resolution images that can be used in reports or presentations. The dimensions of the exported images are customized, and the resolution is set to 600 DPI (dots per inch) to ensure high quality.
+Before saving, the size of each figure is defined in inches to control how large the plot appears in the image.
+
+Purpose of Plot Export Types:
+Interactive .fig files are useful when further editing or interaction with the plot is required in MATLAB. This is beneficial for data exploration and detailed analysis.
+Non-interactive PNG files are static images meant for use in external documents, presentations, or when sharing the results without needing the user to modify the plots.
+
+Examples of Exported Plots:
+The code exports a variety of plots, such as:
+Stacked bar charts showing power losses.
+Cumulative energy plots tracking energy over time.
+Transformer loading plots, displaying how much load a transformer is carrying.
+3D voltage magnitude plots for different phases of an electrical system.
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
